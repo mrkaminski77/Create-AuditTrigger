@@ -110,6 +110,7 @@ $trigger.Insert = $false
 $trigger.Update = $true
 $trigger.Delete = $true
 $triggerText = @"
+BEGIN
 INSERT INTO $($auditSchema).$($targetTable)
 SELECT
     $($table.Columns | %{"$($_.Name),`n`t"})
@@ -120,16 +121,16 @@ FROM inserted;
 INSERT INTO $($auditSchema).$($targetTable)
 SELECT
     $($table.Columns | %{"$($_.Name),`n`t"})
-	,[auditUserName] = USER_ID()
+	[auditUserName] = USER_ID()
 	,[auditReason] = 'DELETED'
 	,[auditTimeStamp] = GETDATE()
 FROM deleted;
+END
 "@
+
 $triggerText
 $trigger.TextBody = $triggerText
-$trigger.ImplementationType = [Microsoft.SqlServer.Management.SMO.ImplementationType]::TransactSql
+#$trigger.ImplementationType = [Microsoft.SqlServer.Management.SMO.ImplementationType]::TransactSql
 
 
 $trigger.Create()
-
-
